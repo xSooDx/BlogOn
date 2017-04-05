@@ -3,7 +3,7 @@ from os import environ
 
 app = Flask(__name__)
 
-import views
+import blogon_views
 import apis
 
 

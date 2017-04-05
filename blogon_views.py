@@ -4,7 +4,7 @@ from actions import login, logout, register_user
 from functools import wraps
 
 
-def login_required(f):
+def blogon_login_required(f):
     @wraps(f)
     def wrap(*args,**kwargs):
         if 'logged_in' in session:
@@ -58,13 +58,13 @@ def register_page():
 
 
 @app.route("/blogon/dashboard")
-@login_required
+@blogon_login_required
 def dashboard_page():
     return render_template("BlogOn/dashboard.html")
 
 
 @app.route("/blogon/logout")
-@login_required
+@blogon_login_required
 def logout_page():
     logout()
     return redirect(url_for('root'))
