@@ -1,42 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-    <link
-        rel="stylesheet"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-        crossorigin="anonymous">
-    <link href="{{ url_for('static',filename='BlogOn/css/style.css')}}"
-          rel="stylesheet">
-    <script
-        src="https://code.jquery.com/jquery-3.2.1.min.js"
-        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-        crossorigin="anonymous"></script>
-    <script
-        src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
-</head>
-<body>
-    <div class="bo-login-form">
-        <h3>BlogOn Admin Login</h3>
-        <form method="post" action="{{url_for('login_page')}}">
-            <form>
-              <div class="form-group">
-                <label for="username">Username or Email address:</label>
-                <input name="username" type="text" class="form-control" id="username">
-              </div>
-              <div class="form-group">
-                <label for="pwd">Password:</label>
-                <input type="password" name="password" class="form-control" id="pwd">
-              </div>
-              <div class="checkbox">
-                <label><input name="remember" type="checkbox"> Remember me</label>
-              </div>
-              <button type="submit" class="btn btn-default">Submit</button>
-            </form>
+
+{% extends 'BlogOn/layout.html' %}
+{% block header %}
+{% endblock %}
+
+{% block body %}
+<div class="bo-login-form">
+    <h3>BlogOn Admin Login</h3>
+    <form method="post" action="{{url_for('login_page')}}">
+        <form>
+          <div class="form-group">
+            <label for="username">Username or Email address:</label>
+            <input name="username" type="text" class="form-control" id="username" required>
+          </div>
+          <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="password" name="password" class="form-control" id="pwd" required>
+          </div>
+          <div class="checkbox">
+            <label><input name="remember" type="checkbox"> Remember me</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
         </form>
-    </div>
-</body>
-</html>
+    </form>
+</div>
+{% endblock %}

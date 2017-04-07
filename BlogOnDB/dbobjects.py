@@ -1,5 +1,5 @@
 class Post:
-    def __init__(self, postid, userid, title, content, description=None, tags=None, ptype=0, img=None, categories=None):
+    def __init__(self, postid, userid, title, content, description=None, categories=None, tags=None, ptype=0, img=None ):
         self.postid = postid
         self.userid = userid
         self.title = title
@@ -35,3 +35,5 @@ class Comment:
         self.email = email
         self.name = name
         self.comment = comment
+
+

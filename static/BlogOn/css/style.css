@@ -5,3 +5,19 @@
     max-width:500px;
     margin:100px auto;
 }
+
+.w-main{
+
+}
+.w-title{
+    font-size:25px;
+    height:40px;
+}
+
+.w-editor{
+    top:0px;
+    bottom:0px;
+}
+.w-sidebar{
+
+}

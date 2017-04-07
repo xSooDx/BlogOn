@@ -1,0 +1,90 @@
+{%extends 'BlogOn/Layout.html'%}
+
+{% block scripts %}
+<script src="{{url_for('static',filename='tinymce/tinymce.min.js')}}"></script>
+<script>
+    tinymce.init({
+        selector:'#post_content',
+        min_height:400,
+        resize:false,
+        menubar:false,
+        plugins:'link image code lists advlist',
+        //preview_styles: 'font-size color'
+        toolbar1:'undo redo | fontselect | styleselect | bold italic underline | superscript subscript | link image | alignleft aligncenter alignright | outdent indent | bullist numlist | code',
+        }
+    );
+    var pm = {
+        init:function(){
+            form=$("#post_form")
+            title=$("#post_title")
+            content=$("#post_content")
+            description=$("#post_description")
+            tags=$("#post_tags")
+        },
+        update:function(){
+
+        },
+        create:function(){
+            $.post("{{url_for('create_post_task')}}", JSON.stringify(form.serialize()))
+        },
+        publish:function(){
+            pm.update()
+            $.post("{{url_for('publish_post_task')}}",
+                {postid:postid},
+                pm.gotoDashboard
+            )
+        },
+        gotoDashboard:function(Data){
+            window.location.replace("{{url_for('dashboard_page')}}")
+        }
+
+    }
+    $(document).ready(pm.init)
+</script>
+{% endblock %}
+
+{% block body %}
+<div>
+    <form id="post_form" action="{{url_for('create_post_task')}}" method="post" >
+        <div class="col-md-9 w-main">
+            <div class="row">
+            <div class="col-sm-10">
+                <div class="form-group">
+                    <input class="form-control w-title" name="title" id="post_title" placeholder="Your post's title" />
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <p  class="pull-right">
+                <input class="btn btn-primary" type="submit" value="Publish"/>
+                </p>
+            </div>
+            </div>
+
+            <textarea class="w-editor" name="content" id="post_content" placeholder="Your post"></textarea>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Description</div>
+                <div class="panel-body">
+                  <textarea id="post_description" name="description" class="form-control" placeholder="Enter description for post"></textarea>
+                </div>
+                <div class="panel-heading">Categories</div>
+                <div class="panel-body">
+                    <p id="post_categories">
+                    <input type="hidden" name="categories" value=".">
+                    {% for category in get_categories() %}
+                        <label><input type="checkbox" name="categories" value="{{category['name']}}"> {{category['name']}}</label><br/>
+                    {% endfor %}
+                    </p>
+                    <input type="button" class="btn btn-info" value="Add category"/>
+                </div>
+                <div class="panel-heading">Tags</div>
+                <div class="panel-body">
+                  <textarea id="post_tags" name="tags" class="form-control" placeholder="Enter tags separated by commas"></textarea>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

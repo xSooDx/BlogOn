@@ -24,6 +24,27 @@ def connect():
     return c, conn
 
 
+def get_categories():
+    c, conn = connect()
+    c.execute('SELECT name FROM categories ')
+    categories = c.fetchall()
+    return categories
+
+
+def get_child_categories(category):
+    c, conn = connect()
+    c.execute('SELECT * FROM categories WHERE parent=%s', (thwart(category),))
+    categories = c.fetchall()
+    return categories
+
+
+def get_top_level_categories():
+    c, conn = connect()
+    c.execute('SELECT * FROM categories WHERE parent=NULL');
+    categories = c.fetchall()
+    return categories
+
+
 def get(type, **clause):
     pass
 
@@ -45,28 +66,187 @@ def get_comment_by_id(id):
     pass
 
 
-# POSTS
-def get_post_by_id(id):
+# USERS
+def get_users():
     pass
+
+
+def get_users_by_id():
+    pass
+
+
+# POSTS
+def get_num_posts():
+    c,conn=connect()
+    c.execute("SELECT count(*) as n FROM posts")
+    return c.fetchone()['n']
+
+
+def get_posts():
+    c, conn = connect()
+    c.execute("SELECT * FROM posts")
+    data = c.fetchall()
+    posts = []
+    for post in data:
+        n= c.execute("SELECT category FROM post_category WHERE postid=%s", (int(post['postid']),))
+        cats = c.fetchall()
+        cats = [i['category'] for i in cats]
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
+                          post['tags']))
+    close(c, conn)
+    return posts, n
+
+
+def get_post_by_id(postid):
+    c, conn = connect()
+    c.execute("SELECT * FROM posts WHERE postid=%s", (int(postid),))
+    data = c.fetchone()
+    c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
+    cats = c.fetchall();
+    cats = [i['category'] for i in cats]
+    close(c, conn)
+    return Post(data['postid'], data['userid'], data['title'],
+                data['content'], data['description'], data['tags'], cats)
 
 
 def get_posts_by_category(category):
-    pass
+    posts = []
+    c, conn = connect()
+    n=c.execute("SELECT postid FROM post_category where category=%s", (thwart(category),))
+    data = c.fetchall()
+    data = [i['postid'] for i in data]
+    for i in data:
+        c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
+        post = c.fetchone()
+        c.execute("SELECT category FROM post_category WHERE postid=%s", (int(i),))
+        cats = c.fetchall()
+        cats = [i['category'] for i in cats]
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
+                          post['tags']))
+    close(c, conn)
+    return posts,n
 
 
-def get_posts_by_author(author):  # name or authorid
-    if isinstance(author, str):
+def get_posts_by_user(user):  # name or authorid
+    if isinstance(user, str):
         pass
-    elif isinstance(author, int):
+    elif isinstance(user, int):
         pass
 
 
-def create_post(**x):
-    pass
+def content_functions():
+    funcs = {
+        # functions that return more than 1 item also return the number of items
+        # in the form of a tuple 'items, n'
+        # eg- posts,n = get_posts()
+        'get_num_posts': get_num_posts,
+        'get_posts': get_posts,
+        'get_posts_by_user': get_posts_by_user,
+        'get_posts_by_id': get_post_by_id,
+        'get_posts_by_category': get_posts_by_category,
+        'get_categories': get_categories,
+        'get_comments_by_post': get_comments_by_post,
+        'get_comment_by_id': get_comment_by_id,
+        'get_comments_by_name': get_comments_by_name,
+        'get_comments_by_email': get_comments_by_email,
+        'get_users': get_users,
+        'get_users_by_id': get_users_by_id
+    }
+    return funcs
 
 
-def update_post():
-    pass
+def create_post(**d):
+    a = 0
+    x = {
+        'title': '',
+        'content': '',
+        'description': '',
+        'categories': ['.'],
+        'tags': ''
+    }
+    x.update(d)
+    for i in x:
+        if not (x[i] == "" or x[i] is None or x[i] == ['.'] or x[i] == []):
+            a = 1
+            break
+    if a == 0:
+        return -1
+    c, conn = connect()
+
+    c.execute("INSERT INTO posts (userid,title,content,description,tags) values (%s,%s,%s,%s,%s)",
+              (int(session['userid']), thwart(x['title']), thwart(x['content']), thwart(x['description']),
+               thwart(x['tags'])))
+
+    c.execute("SELECT LAST_INSERT_ID() as id")
+    postid = c.fetchone()['id']
+
+    if 'categories' in x:
+
+        for cat in x['categories']:
+            c.execute("INSERT INTO post_category values(%s,%s)", (int(postid), thwart(cat)))
+
+    conn.commit()
+    close(c, conn)
+    return postid
+
+
+def update_post(postid, **d):
+    c, conn = connect()
+    x = {
+        'title': '',
+        'content': '',
+        'description': '',
+        'categories': [],
+        'tags': ''
+    }
+    x.update(d)
+    a = 0
+    qstr = ""
+    data = []
+    for i in x:
+        if not (x[i] == "" or x[i] is None or x[i] == []):
+            a = 1
+            if i in ('title', 'description', 'content', 'tags', 'published'):
+                qstr += (i + "=%s,")
+                data.append(thwart(x[i]))
+    if a == 0:
+        return -1
+    data.append(int(session['userid']))
+    data.append(int(postid))
+    c.execute("UPDATE posts SET " + qstr + " modified_date=CURRENT_TIMESTAMP WHERE userid= %s AND postid=%s", data)
+
+    c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
+    cats = c.fetchall()
+    cats = set([i['category'] for i in cats])
+    if 'categories' in x:
+        cats2 = set(x['categories'])
+        rm = cats - cats2
+        print(cats)
+        print(cats2)
+        print(rm)
+        for i in rm:
+            c.execute("DELETE FROM post_category WHERE postid=%s and category=%s", (int(postid), i))
+        ad = cats2 - cats
+        print(ad)
+        for i in ad:
+            c.execute("INSERT INTO post_category values(%s, %s)", (int(postid), i))
+
+    conn.commit()
+    close(c, conn)
+
+
+def publish_post(postid):
+    c, conn = connect()
+    c.execute("UPDATE posts SET published=1 WHERE postid=%s", (int(postid),))
+    conn.commit()
+    close(c, conn)
+
+
+def delete_post(postid):
+    c, conn = connect()
+    c.execute("DELETE FROM posts WHERE userid=%s AND postid=%s", (int(session['userid']), int(postid)))
+    conn.commit()
+    close(c, conn)
 
 
 def login(username, password, remember=False):
@@ -74,7 +254,9 @@ def login(username, password, remember=False):
     res = c.execute("SELECT * FROM users WHERE (username=%s OR email=%s) AND NOT rank=-1",
                     (thwart(username), thwart(username)))
     ret = 0
+
     if res > 0:
+        print('a')
         row = c.fetchone()
         if sha256_crypt.verify(password, row['passwordhash']):
             # login successful, set session vars.
