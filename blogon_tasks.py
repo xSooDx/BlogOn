@@ -9,11 +9,11 @@ from actions import create_post, update_post, publish_post
 @blogon_login_required
 def create_post_task():
     l = request.values.getlist('categories')
-    l.pop[0]
+    l.pop(0)
     a = create_post(title=request.values['title'],
                     content=request.values['content'],
                     description=request.values['description'],
-                    categories=request.values.getlist('categories'),
+                    categories=l,
                     tags=request.values['tags'])
 
     return jsonify(result=a)
@@ -23,7 +23,7 @@ def create_post_task():
 @blogon_login_required
 def update_post_task():
     l = request.values.getlist('categories')
-    l.pop[0]
+    l.pop(0)
     a = update_post(title=request.values['title'],
                     content=request.values['content'],
                     decription=request.values['description'],
