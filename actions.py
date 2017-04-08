@@ -75,9 +75,17 @@ def get_users_by_id():
     pass
 
 
+def get_post_categories(postid):
+    c, conn = connect()
+    c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
+    cats = c.fetchall()
+    cats = [i['category'] for i in cats]
+    return cats
+
+
 # POSTS
 def get_num_posts():
-    c,conn=connect()
+    c, conn = connect()
     c.execute("SELECT count(*) as n FROM posts")
     return c.fetchone()['n']
 
@@ -88,13 +96,12 @@ def get_posts():
     data = c.fetchall()
     posts = []
     for post in data:
-        n= c.execute("SELECT category FROM post_category WHERE postid=%s", (int(post['postid']),))
-        cats = c.fetchall()
-        cats = [i['category'] for i in cats]
+        c.execute("SELECT category FROM post_category WHERE postid=%s", (int(post['postid']),))
+        cats = get_post_categories(post['postid'])
         posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
                           post['tags']))
     close(c, conn)
-    return posts, n
+    return posts
 
 
 def get_post_by_id(postid):
@@ -102,8 +109,7 @@ def get_post_by_id(postid):
     c.execute("SELECT * FROM posts WHERE postid=%s", (int(postid),))
     data = c.fetchone()
     c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
-    cats = c.fetchall();
-    cats = [i['category'] for i in cats]
+    cats = get_post_categories(postid)
     close(c, conn)
     return Post(data['postid'], data['userid'], data['title'],
                 data['content'], data['description'], data['tags'], cats)
@@ -112,33 +118,40 @@ def get_post_by_id(postid):
 def get_posts_by_category(category):
     posts = []
     c, conn = connect()
-    n=c.execute("SELECT postid FROM post_category where category=%s", (thwart(category),))
+    c.execute("SELECT postid FROM post_category where category=%s", (thwart(category),))
     data = c.fetchall()
     data = [i['postid'] for i in data]
     for i in data:
         c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
         post = c.fetchone()
-        c.execute("SELECT category FROM post_category WHERE postid=%s", (int(i),))
-        cats = c.fetchall()
-        cats = [i['category'] for i in cats]
+        cats = get_post_categories(i)
         posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
                           post['tags']))
     close(c, conn)
-    return posts,n
+    return posts
 
 
 def get_posts_by_user(user):  # name or authorid
+    c, conn = connect()
+    posts = []
     if isinstance(user, str):
-        pass
-    elif isinstance(user, int):
-        pass
+        c.execute("SELECT * FROM posts WHERE username=%s", (thwart(user),))
+        data = c.fetchall()
+        for i in data:
+            posts.append(Post(i['postid'], i['userid'], i['title'], i['content'], i['description'],
+                              get_post_categories(i['postid']), i['tags']))
 
+    elif isinstance(user, int):
+        c.execute("SELECT * FROM posts WHERE userid=%s", (int(user),))
+        data = c.fetchall()
+        for i in data:
+            posts.append(Post(i['postid'], i['userid'], i['title'], i['content'], i['description'],
+                              get_post_categories(i['postid']), i['tags']))
+    return posts
 
 def content_functions():
     funcs = {
-        # functions that return more than 1 item also return the number of items
-        # in the form of a tuple 'items, n'
-        # eg- posts,n = get_posts()
+
         'get_num_posts': get_num_posts,
         'get_posts': get_posts,
         'get_posts_by_user': get_posts_by_user,

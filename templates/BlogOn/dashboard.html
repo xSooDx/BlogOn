@@ -3,7 +3,15 @@
 {{ super() }}
 {% endblock %}
 {% block body %}
-<div class="jumbotron">
-
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2>Hi {{session['username']}}</h2>
+    </div>
+    <div class="panel-body">
+        {% set posts = get_posts_by_user(session['userid']) %}
+        {% set n = posts|count %}
+        Total no. of posts: {{get_num_posts()}}<br/>
+        Your posts: {{n}}
+    </div>
 </div>
 {% endblock %}
