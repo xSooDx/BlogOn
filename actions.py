@@ -4,7 +4,7 @@ from flask import session
 from passlib.hash import sha256_crypt
 from BlogOnDB import *
 import gc
-
+from flask import jsonify
 
 def close(c, conn):
     c.close()
@@ -51,8 +51,20 @@ def get(type, **clause):
 
 # COMMENTS
 def get_comments_by_post(postid):
-    c, conn = connect();
-
+    c, conn = connect()
+    c.execute("SELECT name,comment FROM comments WHERE postid=%s", (int(postid),))
+    data = c.fetchall()
+    comments = []
+    for comm in data:
+        comments.append({'name':comm['name'],'com':comm['comment']})
+	#comments = [i['category'] for i in cats]
+    return {"comments":comments}
+    
+def post_comment(name, email,comment, postid):
+    c, conn = connect()
+    c.execute("INSERT INTO comments (postid, name,email,comment) values (%s,%s,%s,%s)", (postid,name, email, comment))
+    conn.commit()
+    close(c, conn)
 
 def get_comments_by_email(email):
     pass
