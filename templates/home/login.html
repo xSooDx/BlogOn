@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ user.nickname }} | Blog</title>
+	<link rel="stylesheet" href="static/bootstrap.css">
+	<link rel="stylesheet" href="static/w3.css">
+	<script>
+		function init(){
+			obj = new LoginManager();
+			
+		}
+		LoginManager = function(){
+			
+			function login(){
+				email = document.getElementById('email').value
+				pwd = document.getElementById('pwd').value
+				if(email!="" && pwd!=""){
+					obj.xhr = new XMLHttpRequest();
+					obj.xhr.onreadystatechange = verify
+					obj.xhr.open("POST","",true);
+					obj.xhr.send();
+				}
+			}
+			
+			function verify(){
+			
+			}
+		}
+	
+	</script>
+</head>
+<body onload="init()">
+	<div style="width: 50%;text-align: center; margin: auto;font:30px Arial blue;padding-top:3%;">
+		<a href="/">{{user.nickname}}'s Blog </a>
+	</div>
+	<div class="container well" style="width:50%;margin-top:5%;padding:5%;">
+		<form class="form-horizontal">
+	  <div class="form-group">
+		<label class="control-label col-sm-2" for="email">Email:</label>
+		<div class="col-sm-10">
+		  <input type="email" class="form-control" id="email" placeholder="Enter email">
+		</div>
+	  </div>
+	  <div class="form-group">
+		<label class="control-label col-sm-2" for="pwd">Password:</label>
+		<div class="col-sm-10"> 
+		  <input type="password" class="form-control" id="pwd" placeholder="Enter password">
+		</div>
+	  </div>
+	  <div class="form-group"> 
+		<div class="col-sm-offset-2 col-sm-10">
+		  <div class="checkbox">
+			<label><input type="checkbox" name="" value=""> Remember me</label>
+		  </div>
+		</div>
+	  </div>
+	  <div class="form-group"> 
+		<div class="col-sm-offset-2 col-sm-10">
+		  <button type="button" class="btn btn-default" onclick="obj.login()">Submit</button>
+		</div>
+	  </div>
+	</form>
+	</div>
+</body>
+</html>

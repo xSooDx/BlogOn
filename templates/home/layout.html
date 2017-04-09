@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ user.nickname }} | Blog</title>
+	<link rel="stylesheet" href="static/home/css/bootstrap.css">
+	<link rel="stylesheet" href="static/home/css/w3.css">
+	<link rel="stylesheet" href="static/home/css/index.css">
+	<script src = "static/home/js/jquery-3.2.0.min.js"></script>
+</head>
+<div class="w3-display-container" >
+	<img id="image" src="static/home/city.jpg"></img>
+	<div class="w3-display-middle w3-large">	
+		<div class="w3-panel w3-black" style="padding:20px; padding-left:40px; padding-right:40px">
+		 <h2 class="w3-text-shadow" >{{user.nickname}}</h2>
+		</div>
+	</div>
+	<!--<div class="w3-display-topright w3-large" style="padding:5px;">	
+		<a type="button" class="btn btn-default" href="/login">Login</a >
+	</div>-->
+</div>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid container">
+	<ul class="nav navbar-nav">
+	  <li {%- if request.path == "/" %} class="active"{% endif %}><a href="/">Home</a></li>
+	  <li {%- if request.path == "/about" %} class="active"{% endif %}><a href="/about">About</a></li>
+	  <li {%- if request.path == "/contact" %} class="active"{% endif %}><a href="/contact">Contact</a></li>
+	</ul>
+	<ul class="nav navbar-nav navbar-right">
+		<li><a href="/blogon/login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+    </ul>
+  </div>
+</nav>
+{% block body %}{% endblock %}
