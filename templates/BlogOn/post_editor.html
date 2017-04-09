@@ -15,11 +15,22 @@
     );
     var pm = {
         init:function(){
+
             form=$("#post_form")
+            postid=$("#post_id")
             title=$("#post_title")
             content=$("#post_content")
             description=$("#post_description")
             tags=$("#post_tags")
+            categories=$("post_categories")
+
+            {% if post is defined %}
+            postid.val('{{post.postid}}')
+            title.val('{{post.title}}')
+            content.val('{{post.content|safe}}')
+            description.val('{{post.description}}')
+            tags.val('{{post.tags}}')
+            {% endif %}
         },
         update:function(){
 
@@ -36,6 +47,9 @@
         },
         gotoDashboard:function(Data){
             window.location.replace("{{url_for('dashboard_page')}}")
+        },
+        onSave:function(data){
+            postid.value=data.result
         }
 
     }
@@ -46,6 +60,7 @@
 {% block body %}
 <div>
     <form id="post_form" action="{{url_for('create_post_task')}}" method="post" >
+        <input type="hidden" name="postid" id="post_id" value="">
         <div class="col-md-9 w-main">
             <div class="row">
             <div class="col-sm-10">
@@ -73,7 +88,10 @@
                     <p id="post_categories">
                     <input type="hidden" name="categories" value=".">
                     {% for category in get_categories() %}
-                        <label><input type="checkbox" name="categories" value="{{category['name']}}"> {{category['name']}}</label><br/>
+                        <label><input type="checkbox" name="categories" value="{{category['name']}}"
+                              checked="{% if post is defined and category['name'] in post.categories %} true {% else %} false {% endif %}">
+                            {{category['name']}}
+                        </label><br/>
                     {% endfor %}
                     </p>
                     <input type="button" class="btn btn-info" value="Add category"/>

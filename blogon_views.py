@@ -1,6 +1,6 @@
 from main import app
 from flask import render_template, request, redirect, url_for, session, flash
-from actions import login, logout, register_user, content_functions;
+from actions import login, logout, register_user, content_functions, get_post_by_id
 from functools import wraps
 
 
@@ -29,6 +29,13 @@ def root():
 
 
 @app.route("/blogon/", methods=['GET'])
+def blogon_page():
+    if 'logged_in' in session:
+        return redirect(url_for('dashboard_page'))
+    else:
+        return redirect(url_for('login_page'))
+
+
 @app.route("/blogon/login", methods=["GET", "POST"])
 def login_page():
     if request.method == "POST":
@@ -102,7 +109,13 @@ def posts_page():
 @blogon_login_required
 def create_post_page():
     page = PageData("create_post", "Create Post")
-    return render_template("BlogOn/create_post.html", page=page)
+    return render_template("BlogOn/post_editor.html", page=page)
+
+
+@app.route("/blogon/edit_post/<int:postid>")
+def edit_post_page(postid):
+    page = PageData("edit_post", "Edit Post")
+    return render_template("BlogOn/post_editor.html", page=page, post=get_post_by_id(postid))
 
 
 @app.route("/blogon/profile")
