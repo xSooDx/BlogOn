@@ -23,9 +23,6 @@ def blogon_login_required(f):
     return wrap
 
 
-@app.route('/')
-def root():
-    return "<a href='/login'>Login</a>"
 
 
 @app.route("/blogon/", methods=['GET'])

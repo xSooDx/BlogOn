@@ -1,0 +1,45 @@
+{% extends "home/layout.html" %}
+{% block body %}
+<script	>
+	function init(){
+		obj = new Posts();
+		obj.load();
+	}
+	Posts = function(){
+		this.load = function(){
+			{% set posts = get_posts() %}
+			{% set char_limit=150 %}
+			{% for i in posts%}
+				obj.putcontent("{{i['title']}}","{{(i['content']|striptags)[:char_limit] }}{% if (i['content']|striptags)|count > char_limit %} ...{%endif%}", "{{i['postid']}}")
+			{%endfor%}
+		}
+		this.putcontent = function(head,post,id){
+			panel = document.createElement('div');
+			panel.className = "panel panel-default";
+			header = document.createElement('div');
+			header.className = "panel-heading";
+			a = document.createElement('a')
+			a.href = "/"+ head.split(" ").join("-")
+			a.innerHTML = head;
+			header.appendChild(a)
+			content = document.createElement('div');
+			content.className = "panel-body";
+			content.innerHTML = post;
+			panel.appendChild(header);
+			panel.appendChild(content);
+			pgroup = document.getElementById('posts');
+			pgroup.appendChild(panel);
+		}
+	}
+	
+</script>  
+<body onload="init()">
+	<div class="container">
+	<div class="row">
+		<div class="col-sm-8"><div class="panel-group" id="posts" ></div></div>
+		<div class="col-sm-1"></div>
+		<div class="col-sm-3">Search box</div>	
+	</div>
+	</div>
+</body>
+{% endblock %}

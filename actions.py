@@ -1,11 +1,10 @@
 import MySQLdb
 from MySQLdb import escape_string as thwart
-from html import unescape, escape
 from flask import session
 from passlib.hash import sha256_crypt
 from BlogOnDB import *
 import gc
-
+from flask import jsonify
 
 def close(c, conn):
     c.close()
@@ -52,8 +51,20 @@ def get(type, **clause):
 
 # COMMENTS
 def get_comments_by_post(postid):
-    c, conn = connect();
-
+    c, conn = connect()
+    c.execute("SELECT name,comment FROM comments WHERE postid=%s", (int(postid),))
+    data = c.fetchall()
+    comments = []
+    for comm in data:
+        comments.append({'name':comm['name'],'com':comm['comment']})
+	#comments = [i['category'] for i in cats]
+    return {"comments":comments}
+    
+def post_comment(name, email,comment, postid):
+    c, conn = connect()
+    c.execute("INSERT INTO comments (postid, name,email,comment) values (%s,%s,%s,%s)", (postid,name, email, comment))
+    conn.commit()
+    close(c, conn)
 
 def get_comments_by_email(email):
     pass
@@ -129,6 +140,17 @@ def get_post_by_id(postid):
     return data
 
 
+def get_post_by_title(title):
+    str = " ".join(title.split("-"))
+    c, conn = connect()
+    c.execute("SELECT * FROM posts WHERE title=%s", (str,))
+    data = c.fetchone()
+    c.execute("SELECT category FROM post_category WHERE postid=%s", (int(data['postid']),))
+    cats = get_post_categories(data['postid'])
+    close(c, conn)
+    return Post(data['postid'], data['userid'], data['title'],
+                data['content'], data['description'], data['tags'], cats)
+
 def get_posts_by_category(category):
     posts = []
     c, conn = connect()
@@ -139,6 +161,7 @@ def get_posts_by_category(category):
         c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
         post = c.fetchone()
         cats = get_post_categories(i)
+
         posts.append(
             Post(post['postid'], post['userid'], post['title'], unescape(post['content']), post['description'], cats,
                  post['tags']))
@@ -154,6 +177,7 @@ def get_posts_by_user(user):  # name or authorid
         data = c.fetchall()
         for i in data:
             i['categories'] = get_post_categories(i['postid'])
+
     elif isinstance(user, int):
         c.execute("SELECT * FROM posts WHERE userid=%s", (int(user),))
         data = c.fetchall()
@@ -212,7 +236,6 @@ def create_post(**d):
     if 'categories' in x:
 
         for cat in x['categories']:
-            print(thwart(cat))
             c.execute("INSERT INTO post_category values(%s,%s)", (int(postid), thwart(cat)))
 
     conn.commit()

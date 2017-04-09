@@ -45,7 +45,7 @@
             <li {% if page.name=='posts' %} class="active" {% endif %}><a href="{{url_for('posts_page')}}"><span class="glyphicon glyphicon-edit"></span> Posts</a></li>
             <li {% if page.name=='pages' %} class="active" {% endif %}><a href="{{url_for('pages_page')}}"><span class="glyphicon glyphicon-book"></span> Pages</a></li>
             <li {% if page.name=='settings' %} class="active" {% endif %}><a href="{{url_for('settings_page')}}"><span class="glyphicon glyphicon-wrench"></span> Settings</a></li>
-            <li  ><a href="{{url_for('root')}}"><span class="glyphicon glyphicon-home"></span> Site</a></li>
+            <li><a href="/"><span class="glyphicon glyphicon-home"></span> Site</a></li>
             <!--<li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">Posts<span class="caret"></span></a>
               <ul class="dropdown-menu">
