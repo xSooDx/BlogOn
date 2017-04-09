@@ -80,22 +80,11 @@ def get_comment_by_id(id):
 
 # USERS
 def get_users():
-    c, conn = connect()
-    c.execute("SELECT userid,username,email,rank FROM post_category")
-    d = c.fetchall()
-    users = []
-    for u in d:
-        users.append(User(u['userid'], u['username'], u['email'], u['rank']))
-    close(c, conn)
-    return users
+    pass
 
 
-def get_user_by_id(userid):
-    c, conn = connect()
-    c.execute("SELECT userid,username,email,rank FROM users WHERE userid=%s", (int(userid),))
-    d = c.fetchone()
-    close(c, conn)
-    return d
+def get_users_by_id():
+    pass
 
 
 def get_post_categories(postid):
@@ -103,7 +92,6 @@ def get_post_categories(postid):
     c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
     cats = c.fetchall()
     cats = [i['category'] for i in cats]
-    close(c, conn)
     return cats
 
 
@@ -111,34 +99,32 @@ def get_post_categories(postid):
 def get_num_posts():
     c, conn = connect()
     c.execute("SELECT count(*) as n FROM posts")
-    a = c.fetchone()['n']
-    close(c, conn)
-    return a
+    return c.fetchone()['n']
 
 
 def get_posts():
     c, conn = connect()
-    c.execute("SELECT * FROM posts ORDER BY creation_date DESC ")
+    c.execute("SELECT * FROM posts")
     data = c.fetchall()
-
+    posts = []
     for post in data:
-        c.execute("SELECT category FROM post_category WHERE postid=%s ", (int(post['postid']),))
+        c.execute("SELECT category FROM post_category WHERE postid=%s", (int(post['postid']),))
         cats = get_post_categories(post['postid'])
-        post['categories'] = cats
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
+                          post['tags']))
     close(c, conn)
-    return data
+    return posts
 
 
 def get_post_by_id(postid):
     c, conn = connect()
-    c.execute("SELECT * FROM posts WHERE postid=%s ORDER BY creation_date", (int(postid),))
+    c.execute("SELECT * FROM posts WHERE postid=%s", (int(postid),))
     data = c.fetchone()
     c.execute("SELECT category FROM post_category WHERE postid=%s", (int(postid),))
     cats = get_post_categories(postid)
     close(c, conn)
-    data['categories'] = cats
-    return data
-
+    return Post(data['postid'], data['userid'], data['title'],
+                data['content'], data['description'], data['tags'], cats)
 
 def get_post_by_title(title):
     str = " ".join(title.split("-"))
@@ -154,40 +140,36 @@ def get_post_by_title(title):
 def get_posts_by_category(category):
     posts = []
     c, conn = connect()
-    c.execute("SELECT postid FROM post_category where category=%s creation_date", (thwart(category),))
+    c.execute("SELECT postid FROM post_category where category=%s", (thwart(category),))
     data = c.fetchall()
     data = [i['postid'] for i in data]
     for i in data:
         c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
         post = c.fetchone()
         cats = get_post_categories(i)
-
-        posts.append(
-            Post(post['postid'], post['userid'], post['title'], unescape(post['content']), post['description'], cats,
-                 post['tags']))
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
+                          post['tags']))
     close(c, conn)
     return posts
 
 
 def get_posts_by_user(user):  # name or authorid
     c, conn = connect()
-
+    posts = []
     if isinstance(user, str):
-        c.execute("SELECT * FROM posts WHERE username=%s date_created", (thwart(user),))
+        c.execute("SELECT * FROM posts WHERE username=%s", (thwart(user),))
         data = c.fetchall()
         for i in data:
-            i['categories'] = get_post_categories(i['postid'])
+            posts.append(Post(i['postid'], i['userid'], i['title'], i['content'], i['description'],
+                              get_post_categories(i['postid']), i['tags']))
 
     elif isinstance(user, int):
         c.execute("SELECT * FROM posts WHERE userid=%s", (int(user),))
         data = c.fetchall()
         for i in data:
-            i['categories'] = get_post_categories(i['postid'])
-    else:
-        return -1
-    close(c, conn)
-    return data
-
+            posts.append(Post(i['postid'], i['userid'], i['title'], i['content'], i['description'],
+                              get_post_categories(i['postid']), i['tags']))
+    return posts
 
 def content_functions():
     funcs = {
@@ -203,7 +185,7 @@ def content_functions():
         'get_comments_by_name': get_comments_by_name,
         'get_comments_by_email': get_comments_by_email,
         'get_users': get_users,
-        'get_user_by_id': get_user_by_id
+        'get_users_by_id': get_users_by_id
     }
     return funcs
 
@@ -286,7 +268,6 @@ def update_post(postid, **d):
 
     conn.commit()
     close(c, conn)
-    return postid
 
 
 def publish_post(postid):

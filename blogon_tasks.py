@@ -1,10 +1,8 @@
 from flask import flash, jsonify
-from flask import request, redirect
-from flask import url_for
-
+from flask import request
 from main import app
 from blogon_views import blogon_login_required
-from actions import create_post, update_post, publish_post, delete_post
+from actions import create_post, update_post, publish_post
 
 
 @app.route("/blogon/tasks/post/create", methods=['POST'])
@@ -17,8 +15,7 @@ def create_post_task():
                     description=request.values['description'],
                     categories=l,
                     tags=request.values['tags'])
-    if not a == -1:
-        flash("Post Saved")
+
     return jsonify(result=a)
 
 
@@ -27,14 +24,11 @@ def create_post_task():
 def update_post_task():
     l = request.values.getlist('categories')
     l.pop(0)
-    a = update_post(request.values['postid'],
-                    title=request.values['title'],
+    a = update_post(title=request.values['title'],
                     content=request.values['content'],
                     decription=request.values['description'],
                     categories=l,
                     tags=request.values['tags'])
-    if not a == -1:
-        flash("Post Saved")
     return jsonify(result=a)
 
 
@@ -43,15 +37,3 @@ def update_post_task():
 def publish_post_task():
     publish_post(request.form['postid'])
     flash("Your post has been published.")
-    return redirect(url_for('posts_page'))
-
-
-@app.route("/blogon/tasks/post/delete", methods=['POST'])
-@blogon_login_required
-def delete_post_task():
-    a = delete_post(request.values['postid'])
-    if a == -1:
-        flash("You are not the author of this post")
-    else:
-        flash("Post has been deleted")
-    return redirect(url_for('posts_page'))
