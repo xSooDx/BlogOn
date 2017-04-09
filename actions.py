@@ -1,6 +1,5 @@
 import MySQLdb
 from MySQLdb import escape_string as thwart
-from html import unescape, escape
 from flask import session
 from passlib.hash import sha256_crypt
 from BlogOnDB import *
@@ -99,8 +98,7 @@ def get_posts():
     for post in data:
         c.execute("SELECT category FROM post_category WHERE postid=%s", (int(post['postid']),))
         cats = get_post_categories(post['postid'])
-        print(post['content'])
-        posts.append(Post(post['postid'], post['userid'], post['title'], (post['content']), post['description'], cats,
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
                           post['tags']))
     close(c, conn)
     return posts
@@ -114,8 +112,18 @@ def get_post_by_id(postid):
     cats = get_post_categories(postid)
     close(c, conn)
     return Post(data['postid'], data['userid'], data['title'],
-                unescape(data['content']), data['description'], data['tags'], cats)
+                data['content'], data['description'], data['tags'], cats)
 
+def get_post_by_title(title):
+    str = " ".join(title.split("-"))
+    c, conn = connect()
+    c.execute("SELECT * FROM posts WHERE title=%s", (str,))
+    data = c.fetchone()
+    c.execute("SELECT category FROM post_category WHERE postid=%s", (int(data['postid']),))
+    cats = get_post_categories(data['postid'])
+    close(c, conn)
+    return Post(data['postid'], data['userid'], data['title'],
+                data['content'], data['description'], data['tags'], cats)
 
 def get_posts_by_category(category):
     posts = []
@@ -127,7 +135,7 @@ def get_posts_by_category(category):
         c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
         post = c.fetchone()
         cats = get_post_categories(i)
-        posts.append(Post(post['postid'], post['userid'], post['title'], unescape(post['content']), post['description'], cats,
+        posts.append(Post(post['postid'], post['userid'], post['title'], post['content'], post['description'], cats,
                           post['tags']))
     close(c, conn)
     return posts
@@ -140,7 +148,7 @@ def get_posts_by_user(user):  # name or authorid
         c.execute("SELECT * FROM posts WHERE username=%s", (thwart(user),))
         data = c.fetchall()
         for i in data:
-            posts.append(Post(i['postid'], i['userid'], i['title'], unescape(i['content']), i['description'],
+            posts.append(Post(i['postid'], i['userid'], i['title'], i['content'], i['description'],
                               get_post_categories(i['postid']), i['tags']))
 
     elif isinstance(user, int):
@@ -198,7 +206,6 @@ def create_post(**d):
     if 'categories' in x:
 
         for cat in x['categories']:
-            print(thwart(cat))
             c.execute("INSERT INTO post_category values(%s,%s)", (int(postid), thwart(cat)))
 
     conn.commit()
