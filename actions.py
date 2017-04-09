@@ -4,7 +4,9 @@ from flask import session
 from passlib.hash import sha256_crypt
 from BlogOnDB import *
 import gc
-from flask import jsonify
+
+from blogon_events import logEvent
+
 
 def close(c, conn):
     c.close()
@@ -40,7 +42,7 @@ def get_child_categories(category):
 
 def get_top_level_categories():
     c, conn = connect()
-    c.execute('SELECT * FROM categories WHERE parent=NULL');
+    c.execute('SELECT * FROM categories WHERE parent=NULL')
     categories = c.fetchall()
     return categories
 
@@ -56,15 +58,17 @@ def get_comments_by_post(postid):
     data = c.fetchall()
     comments = []
     for comm in data:
-        comments.append({'name':comm['name'],'com':comm['comment']})
-	#comments = [i['category'] for i in cats]
-    return {"comments":comments}
-    
-def post_comment(name, email,comment, postid):
+        comments.append({'name': comm['name'], 'com': comm['comment']})
+    # comments = [i['category'] for i in cats]
+    return {"comments": comments}
+
+
+def post_comment(name, email, comment, postid):
     c, conn = connect()
-    c.execute("INSERT INTO comments (postid, name,email,comment) values (%s,%s,%s,%s)", (postid,name, email, comment))
+    c.execute("INSERT INTO comments (postid, name,email,comment) values (%s,%s,%s,%s)", (postid, name, email, comment))
     conn.commit()
     close(c, conn)
+
 
 def get_comments_by_email(email):
     pass
@@ -141,15 +145,16 @@ def get_post_by_id(postid):
 
 
 def get_post_by_title(title):
-    str = " ".join(title.split("-"))
+    tstr = " ".join(title.split("-"))
     c, conn = connect()
-    c.execute("SELECT * FROM posts WHERE title=%s", (str,))
+    c.execute("SELECT * FROM posts WHERE title=%s", (tstr,))
     data = c.fetchone()
     c.execute("SELECT category FROM post_category WHERE postid=%s", (int(data['postid']),))
     cats = get_post_categories(data['postid'])
     close(c, conn)
-    return Post(data['postid'], data['userid'], data['title'],
-                data['content'], data['description'], data['tags'], cats)
+    data['categories']=cats
+    return data
+
 
 def get_posts_by_category(category):
     posts = []
@@ -161,10 +166,8 @@ def get_posts_by_category(category):
         c.execute("SELECT * FROM posts WHERE postid=%s", (int(i),))
         post = c.fetchone()
         cats = get_post_categories(i)
-
-        posts.append(
-            Post(post['postid'], post['userid'], post['title'], unescape(post['content']), post['description'], cats,
-                 post['tags']))
+        post['categories'] = cats
+        posts.append(post)
     close(c, conn)
     return posts
 
@@ -240,6 +243,7 @@ def create_post(**d):
 
     conn.commit()
     close(c, conn)
+    logEvent("post create", "userid=" + str(session['userid']) + " postid=" + str(postid))
     return postid
 
 
@@ -286,6 +290,7 @@ def update_post(postid, **d):
 
     conn.commit()
     close(c, conn)
+    logEvent("post update", "userid=" + str(session['userid']) + " postid=" + str(postid))
     return postid
 
 
@@ -294,6 +299,8 @@ def publish_post(postid):
     c.execute("UPDATE posts SET published=1 WHERE postid=%s", (int(postid),))
     conn.commit()
     close(c, conn)
+    logEvent("post publish", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    return postid
 
 
 def delete_post(postid):
@@ -301,6 +308,8 @@ def delete_post(postid):
     c.execute("DELETE FROM posts WHERE userid=%s AND postid=%s", (int(session['userid']), int(postid)))
     conn.commit()
     close(c, conn)
+    logEvent("post delete", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    return postid
 
 
 def login(username, password, remember=False):
@@ -336,7 +345,8 @@ def register_user(username, email, password):
     userid = c.fetchone()['userid']
     set_login_session(userid, username, email)
     close(c, conn)
-    return 1
+    logEvent("user register", "userid=" + userid)
+    return userid
 
 
 def set_login_session(userid, username, email):

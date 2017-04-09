@@ -17,8 +17,8 @@ def create_post_task():
                     description=request.values['description'],
                     categories=l,
                     tags=request.values['tags'])
-    if not a == -1:
-        flash("Post Saved")
+
+    flash("Post Saved")
     return jsonify(result=a)
 
 
@@ -33,15 +33,13 @@ def update_post_task():
                     decription=request.values['description'],
                     categories=l,
                     tags=request.values['tags'])
-    if not a == -1:
-        flash("Post Saved")
     return jsonify(result=a)
 
 
 @app.route("/blogon/tasks/post/publish", methods=['POST'])
 @blogon_login_required
 def publish_post_task():
-    publish_post(request.form['postid'])
+    a = publish_post(request.form['postid'])
     flash("Your post has been published.")
     return redirect(url_for('posts_page'))
 
