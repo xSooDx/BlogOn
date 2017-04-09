@@ -45,6 +45,7 @@ def post(title):
     except:
         # change to 404 not found
         post = ""
+        return redirect(url_for('error'))
     return render_template('home/post.html', user=user, post=post)
 
 
@@ -67,5 +68,10 @@ def make_comment():
         post_comment(name, email, comment, postid)
         return "SUCCESS"
     except:
-        pass
+        return redirect(url_for('error'))
     return "FAIL"
+
+@app.route('/error')
+def error():
+	user = {'nickname': 'MIGUEL'}
+	return render_template('home/error.html', user=user)
