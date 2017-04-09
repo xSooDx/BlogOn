@@ -7,4 +7,4 @@ import blogon_views
 import apis
 import blogon_tasks
 import views
-
+import settings

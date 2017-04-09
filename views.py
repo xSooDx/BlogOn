@@ -2,6 +2,7 @@ from main import app
 from flask import render_template, request, redirect, url_for, session, flash
 from actions import login, logout, register_user, content_functions, get_post_by_title, get_comments_by_post, \
     post_comment;
+from settings import get_settings
 from functools import wraps
 import json
 
@@ -11,19 +12,19 @@ import json
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'nickname': 'MIGUEL'}
+    user = {'nickname': get_settings()['value']}
     return render_template('home/index.html', user=user)
 
 
 @app.route('/about')
 def about():
-    user = {'nickname': 'MIGUEL'}
+    user = {'nickname': get_settings()['value']}
     return render_template('home/about.html', user=user)
 
 
 @app.route('/contact')
 def contact():
-    user = {'nickname': 'MIGUEL'}
+    user = {'nickname': get_settings()['value']}
     return render_template('home/contact.html', user=user)
 
 
@@ -32,7 +33,7 @@ count = 0
 
 @app.route('/<title>')
 def post(title):
-    user = {'nickname': 'MIGUEL'}
+    user = {'nickname': get_settings()['value']}
     global count
     count += 1
     print(count)
@@ -73,5 +74,5 @@ def make_comment():
 
 @app.route('/error')
 def error():
-	user = {'nickname': 'MIGUEL'}
-	return render_template('home/error.html', user=user)
+    user = {'nickname': get_settings()['value']}
+    return render_template('home/error.html', user=user)
