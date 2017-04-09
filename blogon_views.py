@@ -85,7 +85,7 @@ def dashboard_page():
 @blogon_login_required
 def settings_page():
     page = PageData("settings", "Settings", "Manage site settings")
-    return render_template("BlogOn/pages.html", page=page)
+    return render_template("BlogOn/settings.html", page=page)
 
 
 @app.route("/blogon/pages")
