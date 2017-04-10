@@ -1,4 +1,6 @@
 from os import environ
+from wsgiref.simple_server import WSGIServer
+
 from main import app
 
 if __name__ == '__main__':
@@ -9,4 +11,6 @@ if __name__ == '__main__':
     except ValueError:
         PORT = 5555
     app.run(HOST, PORT, debug=True)
+    server = WSGIServer(("", 5000), app)
+    server.serve_forever()
 

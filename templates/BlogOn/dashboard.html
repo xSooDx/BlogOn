@@ -2,7 +2,22 @@
 {% block header %}
 {{ super() }}
 {% endblock %}
+{% block scripts %}
+<script>
+/*
+    $(document).ready(function(){
+        logList=$("#log_list")
+        logStream = new EventSource("{{url_for('log_stream')}}")
+        logStream.addEventListener("logUpdate",function(e){
+           console.log(e.data)
+        })
+
+    })
+*/
+</script>
+{% endblock %}
 {% block body %}
+<div class="col-md-6">
 <div class="panel panel-primary">
     <div class="panel-heading">
         <h2>Hi {{session['username']}}</h2>
@@ -13,5 +28,19 @@
         Total no. of posts: {{get_num_posts()}}<br/>
         Your posts: {{n}}
     </div>
+</div>
+</div>
+<div class="col-md-6">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3>Logs</h3>
+        </div>
+        <div class="panel-body">
+            <div id="log_list" class="list-group">
+
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

@@ -14,12 +14,13 @@
             tags=$("#post_tags")
             categories=$("#post_categories input")
             save_status=$("#save_status")
-
+            status_btn=$("#status_btn")
             title.keyup(pm.trigger)
             description.keyup(pm.trigger)
             tags.keyup(pm.trigger)
             categories.change(pm.trigger)
-            saved = false
+
+            saved = {%if post is defined %}true {% else %} false {% endif %}
 
             {% if post is defined %}
             postid.val('{{post.postid}}')
@@ -36,17 +37,14 @@
             save_status.html("<span class='glyphicon glyphicon-refresh'></span>")
             saved = false
             tinymce.triggerSave();
-            console.log("triggered")
+
         },
         update:function(){
-            console.log('update')
             if(title.val() != "" && tinymce.activeEditor.getContent() != "")
             {
                 if(postid.val()==""){
                     pm.create()
-
-                }
-                else{
+                }else{
                     $.post("{{url_for('update_post_task')}}",
                     JSON.parse(JSON.stringify(form.serialize())),
                     pm.onSave)
@@ -54,44 +52,54 @@
             }
         },
         create:function(){
-
             if(title.val() != "" && tinymce.activeEditor.getContent() != ""){
                 $.post("{{url_for('create_post_task')}}",
                  JSON.parse(JSON.stringify(form.serialize())),
                  pm.onSave
-                )
-            }
-        },
+                )}},
         publish:function(){
             if(title.val() != "" && tinymce.activeEditor.getContent() != ""){
                 if(saved){
-
-                }else{
+                    console.log("saved")
                     $.post("{{url_for('publish_post_task')}}",
-                            {postid:postid},
+                            {postid:postid.val()},
                             pm.gotoDashboard)
-                $.post("{{url_for('update_post_task')}}",
-                    JSON.parse(JSON.stringify(form.serialize())), function(){
+                console.log("sent")
+                }/*else{
+                    $.post("{{url_for('update_post_task')}}",
+                        JSON.parse(JSON.stringify(form.serialize())), function(){
                         $.post("{{url_for('publish_post_task')}}",
-                            {postid:postid},
+                            {postid:postid.val()},
                             pm.gotoDashboard)
                     })
-                }
+                }*/
+            }else{
+                alert("Please enter a title and add some content")
             }
+            console.log("done")
+        },
+        unpublish:function(){
+            $.post("{{url_for('unpublish_post_task')}}",
+                    {postid:postid.val()},
+                    function(){
+                        $("#post_status").html("Draft")
+                        status_btn.val("Publish")
+                        status_btn.click(pm.publish)
+                        status_btn.attr("btn btn-primary")
+                    })
         },
         gotoDashboard:function(Data){
+            console.log("dashboard")
             window.location.replace("{{url_for('dashboard_page')}}")
         },
         onSave:function(data){
-            postid.value=data.result
+            postid.val(data.result)
             save_status.html("<span class='glyphicon glyphicon-check'></span> Saved")
             saved=true
-            console.log("saved")
         }
-
     }
-    $(document).ready(pm.init)
 
+    $(document).ready(pm.init)
     tinymce.init({
         selector:'#post_content',
         min_height:400,
@@ -130,22 +138,24 @@
                     {% set class='btn-primary' %}
                     {% set val='Publish' %}
                     {% set data=0 %}
+                    {% set action="pm.publish()" %}
                 {% else %}
                     {% set stat='Published'%}
                     {% set class='btn-default' %}
                     {% set val='Unpublish' %}
                     {% set data=1 %}
+                    {% set action="pm.unpublish()" %}
                 {% endif %}
                 <div class="panel-body text-center">
                 <div class="row">
-                  <div class="col-md-6">
-                    <span>{{stat}}</span>
+                  <div class="col-sm-6">
+                    <span id="post_status">{{stat}}</span>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-sm-6">
                       <span id="save_status"><span class='glyphicon glyphicon-minus'></span></span>
                   </div>
                 </div>
-                  <input data-published="{{data}}" type="button" class="btn {{class}}" value="{{val}}"/>
+                  <input onclick="{{action}}" id="status_btn" data-published="{{data}}" type="button" class="btn {{class}}" value="{{val}}"/>
                 </div>
                 <div class="panel-heading">Description</div>
                 <div class="panel-body">
