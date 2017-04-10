@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2017 at 02:36 PM
+-- Generation Time: Apr 10, 2017 at 12:31 PM
 -- Server version: 10.1.13-MariaDB
 -- PHP Version: 5.6.23
 
@@ -42,7 +42,8 @@ CREATE TABLE `comments` (
   `postid` int(11) NOT NULL,
   `email` varchar(50) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `comment` varchar(250) NOT NULL
+  `comment` varchar(250) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -74,7 +75,7 @@ CREATE TABLE `posts` (
   `modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tags` varchar(250) DEFAULT NULL,
   `type` int(3) NOT NULL DEFAULT '0',
-  `pulblished` tinyint(1) NOT NULL DEFAULT '0',
+  `published` tinyint(1) NOT NULL DEFAULT '0',
   `img` varchar(250) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -156,7 +157,7 @@ ALTER TABLE `posts`
 --
 ALTER TABLE `post_category`
   ADD PRIMARY KEY (`category`,`postid`),
-  ADD KEY `postid` (`postid`);
+  ADD KEY `post_category_ibfk_1` (`postid`);
 
 --
 -- Indexes for table `settings`
@@ -180,7 +181,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `commentid` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `commentid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `pages`
 --
@@ -190,7 +191,7 @@ ALTER TABLE `pages`
 -- AUTO_INCREMENT for table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `postid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `postid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 --
 -- AUTO_INCREMENT for table `users`
 --
@@ -222,8 +223,8 @@ ALTER TABLE `posts`
 -- Constraints for table `post_category`
 --
 ALTER TABLE `post_category`
-  ADD CONSTRAINT `post_category_ibfk_1` FOREIGN KEY (`postid`) REFERENCES `posts` (`postid`),
-  ADD CONSTRAINT `post_category_ibfk_2` FOREIGN KEY (`category`) REFERENCES `categories` (`name`);
+  ADD CONSTRAINT `post_category_ibfk_1` FOREIGN KEY (`postid`) REFERENCES `posts` (`postid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `post_category_ibfk_2` FOREIGN KEY (`category`) REFERENCES `categories` (`name`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
