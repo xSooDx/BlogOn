@@ -3,7 +3,47 @@
 {{ super() }}
 {% endblock %}
 {% block body %}
-<div class="jumbotron">
-
+<script>
+	function update(){
+		data = {'name':$('#blog_name').val()}
+		$.ajax({
+			url: "/update_settings",
+			data:  JSON.stringify(data),
+			type: "POST",
+			contentType: 'application/json;charset=UTF-8',
+			success: update_success,
+			error: function(error) {
+				console.log(error);
+			}
+		});
+	}
+	function update_success(){
+		$('#blog_name').val("")
+		done = document.createElement('div')
+		done.className = "alert alert-success"
+		done.innerHTML = "Successfully Updated"
+		br = document.createElement('br')
+		all = document.getElementById('main')
+		all.appendChild(br)
+		all.appendChild(br)
+		all.appendChild(br)
+		all.appendChild(done)
+	}
+</script>
+<div class="jumbotron" id='main'>
+	<form class="form-horizontal">
+		<div class="form-group">
+			<label class="control-label col-sm-2" >Blog Name:</label>
+			<div class="col-sm-8">
+			<input type="text" class="form-control" id="blog_name" required>
+			</div>
+		</div>
+		
+		<div class="form-group"> 
+			<div class="col-sm-offset-2 col-sm-10">
+			<button type="button" onclick="update()" id='sub' class="btn btn-default">Submit</button>
+			</div>
+		</div>
+	</form>
 </div>
 {% endblock %}

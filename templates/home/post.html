@@ -3,7 +3,7 @@
 <link rel="stylesheet" href = "{{ url_for('static', filename='home/css/font-awesome.min.css')}}"/>
 <script>
 	function init(){
-		$('#content').append($.parseHTML("{{post['content']}}"))
+		$('#content').append($.parseHTML("{{post['content']|safe}}"))
 		var t;
 		$(window).scroll(function() {
 			if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
