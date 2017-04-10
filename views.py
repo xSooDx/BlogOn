@@ -40,7 +40,6 @@ def post(title):
     if title == "":
         return
     # fetch the other details from the database
-    user = {'nickname': 'MIGUEL'}
     try:
         post = get_post_by_title(title)
     except:
