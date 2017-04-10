@@ -141,6 +141,7 @@ def get_post_by_id(postid):
     cats = get_post_categories(postid)
     close(c, conn)
     data['categories'] = cats
+
     return data
 
 
@@ -278,13 +279,9 @@ def update_post(postid, **d):
     if 'categories' in x:
         cats2 = set(x['categories'])
         rm = cats - cats2
-        print(cats)
-        print(cats2)
-        print(rm)
         for i in rm:
             c.execute("DELETE FROM post_category WHERE postid=%s and category=%s", (int(postid), i))
         ad = cats2 - cats
-        print(ad)
         for i in ad:
             c.execute("INSERT INTO post_category values(%s, %s)", (int(postid), i))
 
