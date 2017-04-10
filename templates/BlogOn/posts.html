@@ -20,7 +20,14 @@
 <div class="col-md-10">
     {% set posts = get_posts() %}
     {% set char_limit=250 %}
-    <h4>Total: {{posts|count}}</h4>
+    <div class="row">
+        <div class="col-sm-6">
+        <h4>Total: {{posts|count}}</h4>
+        </div>
+        <div class="col-sm-6 text-right">
+        <a href="{{url_for('create_post_page')}}" role="button" style="right:0;" class="btn btn-info">Add a post</a>
+        </div>
+    </div>
 <div class="panel-group">
   {% for i in posts %}
   <div class="panel panel-primary">

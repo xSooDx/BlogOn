@@ -153,7 +153,7 @@ def get_post_by_title(title):
     c.execute("SELECT category FROM post_category WHERE postid=%s", (int(data['postid']),))
     cats = get_post_categories(data['postid'])
     close(c, conn)
-    data['categories']=cats
+    data['categories'] = cats
     return data
 
 
@@ -293,10 +293,19 @@ def update_post(postid, **d):
 
 def publish_post(postid):
     c, conn = connect()
-    c.execute("UPDATE posts SET published=1 WHERE postid=%s", (int(postid),))
+    c.execute("UPDATE posts SET published=1 WHERE postid=%s and userid=%s", (int(postid), int(session['userid'])))
     conn.commit()
     close(c, conn)
     logEvent("post publish", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    return postid
+
+
+def unpublish_post(postid):
+    c, conn = connect()
+    c.execute("UPDATE posts SET published=0 WHERE postid=%s and userid=%s", (int(postid), int(session['userid'])))
+    conn.commit()
+    close(c, conn)
+    logEvent("post unpublish", "userid=" + str(session['userid']) + " postid=" + str(postid))
     return postid
 
 

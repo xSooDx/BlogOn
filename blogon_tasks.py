@@ -1,10 +1,12 @@
-from flask import flash, jsonify
+from flask import flash, jsonify, session, Response
 from flask import request, redirect
 from flask import url_for
+from time import sleep
 
+from blogon_events import checkLogTime, logTail
 from main import app
 from blogon_views import blogon_login_required
-from actions import create_post, update_post, publish_post, delete_post
+from actions import create_post, update_post, publish_post, delete_post, unpublish_post
 
 
 @app.route("/blogon/tasks/post/create", methods=['POST'])
@@ -41,7 +43,15 @@ def update_post_task():
 def publish_post_task():
     a = publish_post(request.form['postid'])
     flash("Your post has been published.")
-    return redirect(url_for('posts_page'))
+    return jsonify(result=a)
+
+
+@app.route("/blogon/tasks/post/unpublish", methods=['POST'])
+@blogon_login_required
+def unpublish_post_task():
+    a = unpublish_post(request.form['postid'])
+    flash("Your post has been unpublished.")
+    return jsonify(result=a)
 
 
 @app.route("/blogon/tasks/post/delete", methods=['POST'])
@@ -53,3 +63,24 @@ def delete_post_task():
     else:
         flash("Post has been deleted")
     return redirect(url_for('posts_page'))
+
+
+@app.route("/blogon/task/logstream")
+@blogon_login_required
+def log_stream():
+
+    def log():
+        oldLog = 0
+        while True:
+            print('test')
+            newLog = checkLogTime()
+            if newLog > oldLog:
+                oldLog = newLog
+                data = logTail()
+                res = "event: logUpdate\n"
+                res += "retry: 2000\n"
+                res += "data: { 'logs' :" + str(data) + "}\n\n"
+                yield res.encode()
+            sleep(2)
+
+    return Response(log(), mimetype="text/event-stream")
