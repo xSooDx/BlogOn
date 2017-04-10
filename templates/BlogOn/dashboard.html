@@ -9,7 +9,12 @@
         logList=$("#log_list")
         logStream = new EventSource("{{url_for('log_stream')}}")
         logStream.addEventListener("logUpdate",function(e){
-           console.log(e.data)
+        list = ""
+            logs = JSON.parse(e.data.replace(/[']/g,"\""))
+            for(var i=0; i<logs.logs.length; i++){
+                list+="<li class='list-group-item'>"+logs.logs[i]+"</li>"
+            }
+            logList.html(list)
         })
         logStream.addEventListener("error",function(){
             console.log(arguments)
