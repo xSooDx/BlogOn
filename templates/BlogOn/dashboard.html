@@ -4,16 +4,19 @@
 {% endblock %}
 {% block scripts %}
 <script>
-/*
+
     $(document).ready(function(){
         logList=$("#log_list")
         logStream = new EventSource("{{url_for('log_stream')}}")
         logStream.addEventListener("logUpdate",function(e){
            console.log(e.data)
         })
+        logStream.addEventListener("error",function(){
+            console.log(arguments)
+        })
 
     })
-*/
+
 </script>
 {% endblock %}
 {% block body %}
