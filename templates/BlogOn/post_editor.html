@@ -3,75 +3,120 @@
 {% block scripts %}
 <script src="{{url_for('static',filename='tinymce/tinymce.min.js')}}"></script>
 <script>
-    tinymce.init({
-        selector:'#post_content',
-        min_height:400,
-        resize:false,
-        menubar:false,
-        plugins:'link image code lists advlist',
-        //preview_styles: 'font-size color'
-        toolbar1:'undo redo | fontselect | styleselect | bold italic underline | superscript subscript | link image | alignleft aligncenter alignright | outdent indent | bullist numlist | code',
-        }
-    );
+
     var pm = {
         init:function(){
-
+            t_save= null
             form=$("#post_form")
             postid=$("#post_id")
             title=$("#post_title")
-            content=$("#post_content")
             description=$("#post_description")
             tags=$("#post_tags")
-            categories=$("post_categories")
+            categories=$("#post_categories input")
+            save_status=$("#save_status")
+
+            title.keyup(pm.trigger)
+            description.keyup(pm.trigger)
+            tags.keyup(pm.trigger)
+            categories.change(pm.trigger)
+            saved = false
 
             {% if post is defined %}
             postid.val('{{post.postid}}')
             title.val('{{post.title}}')
-            content.val('{{post.content|safe}}')
+            $('#post_content').val('{{post.content|safe}}')
             description.val('{{post.description}}')
             tags.val('{{post.tags}}')
             {% endif %}
         },
+        trigger:function(){
+            if(t_save)
+                clearTimeout(t_save)
+            t_save=setTimeout(pm.update,2500)
+            save_status.html("<span class='glyphicon glyphicon-refresh'></span>")
+            saved = false
+            tinymce.triggerSave();
+            console.log("triggered")
+        },
         update:function(){
+            console.log('update')
+            if(title.val() != "" && tinymce.activeEditor.getContent() != "")
+            {
+                if(postid.val()==""){
+                    pm.create()
 
+                }
+                else{
+                    $.post("{{url_for('update_post_task')}}",
+                    JSON.parse(JSON.stringify(form.serialize())),
+                    pm.onSave)
+                }
+            }
         },
         create:function(){
-            $.post("{{url_for('create_post_task')}}", JSON.stringify(form.serialize()))
+
+            if(title.val() != "" && tinymce.activeEditor.getContent() != ""){
+                $.post("{{url_for('create_post_task')}}",
+                 JSON.parse(JSON.stringify(form.serialize())),
+                 pm.onSave
+                )
+            }
         },
         publish:function(){
-            pm.update()
-            $.post("{{url_for('publish_post_task')}}",
-                {postid:postid},
-                pm.gotoDashboard
-            )
+            if(title.val() != "" && tinymce.activeEditor.getContent() != ""){
+                if(saved){
+
+                }else{
+                    $.post("{{url_for('publish_post_task')}}",
+                            {postid:postid},
+                            pm.gotoDashboard)
+                $.post("{{url_for('update_post_task')}}",
+                    JSON.parse(JSON.stringify(form.serialize())), function(){
+                        $.post("{{url_for('publish_post_task')}}",
+                            {postid:postid},
+                            pm.gotoDashboard)
+                    })
+                }
+            }
         },
         gotoDashboard:function(Data){
             window.location.replace("{{url_for('dashboard_page')}}")
         },
         onSave:function(data){
             postid.value=data.result
+            save_status.html("<span class='glyphicon glyphicon-check'></span> Saved")
+            saved=true
+            console.log("saved")
         }
 
     }
     $(document).ready(pm.init)
+
+    tinymce.init({
+        selector:'#post_content',
+        min_height:400,
+        resize:false,
+        menubar:false,
+        plugins:'link image code lists advlist',
+        setup: function(ed){
+            ed.on('keyup', pm.trigger)
+        },
+        toolbar1:'undo redo | fontselect | styleselect | bold italic underline | superscript subscript | link image | alignleft aligncenter alignright | outdent indent | bullist numlist | code',
+        }
+    )
 </script>
 {% endblock %}
 
 {% block body %}
 <div>
-    <form id="post_form" action="{{url_for('create_post_task')}}" method="post" >
+    <form id="post_form" method="post" >
         <input type="hidden" name="postid" id="post_id" value="">
         <div class="col-md-9 w-main">
             <div class="row">
-            <div class="col-sm-10">
+            <div class="col-sm-12">
                 <div class="form-group">
                     <input class="form-control w-title" name="title" id="post_title" placeholder="Your post's title" />
                 </div>
-            </div>
-            <div class="col-sm-2">
-                <p  class="pull-right">
-                <input class="btn btn-primary" type="submit" value="Publish"/>
-                </p>
             </div>
             </div>
 
@@ -79,6 +124,29 @@
         </div>
         <div class="col-md-3">
             <div class="panel panel-primary">
+                <div class="panel-heading">Status</div>
+                {% if (not post is defined) or post.published == 0 %}
+                    {% set stat='Draft' %}
+                    {% set class='btn-primary' %}
+                    {% set val='Publish' %}
+                    {% set data=0 %}
+                {% else %}
+                    {% set stat='Published'%}
+                    {% set class='btn-default' %}
+                    {% set val='Unpublish' %}
+                    {% set data=1 %}
+                {% endif %}
+                <div class="panel-body text-center">
+                <div class="row">
+                  <div class="col-md-6">
+                    <span>{{stat}}</span>
+                  </div>
+                  <div class="col-md-6">
+                      <span id="save_status"><span class='glyphicon glyphicon-minus'></span></span>
+                  </div>
+                </div>
+                  <input data-published="{{data}}" type="button" class="btn {{class}}" value="{{val}}"/>
+                </div>
                 <div class="panel-heading">Description</div>
                 <div class="panel-body">
                   <textarea id="post_description" name="description" class="form-control" placeholder="Enter description for post"></textarea>
@@ -89,7 +157,7 @@
                     <input type="hidden" name="categories" value=".">
                     {% for category in get_categories() %}
                         <label><input type="checkbox" name="categories" value="{{category['name']}}"
-                              checked="{% if post is defined and category['name'] in post.categories %} true {% else %} false {% endif %}">
+                              {% if post is defined and category['name'] in post.categories %} checked {% endif %}>
                             {{category['name']}}
                         </label><br/>
                     {% endfor %}
