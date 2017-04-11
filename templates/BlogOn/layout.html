@@ -43,7 +43,6 @@
           <ul class="nav navbar-nav">
             <li {% if page.name=='dashboard' %} class="active" {% endif %}><a href="{{url_for('dashboard_page')}}"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</a></li>
             <li {% if page.name=='posts' %} class="active" {% endif %}><a href="{{url_for('posts_page')}}"><span class="glyphicon glyphicon-edit"></span> Posts</a></li>
-            <li {% if page.name=='pages' %} class="active" {% endif %}><a href="{{url_for('pages_page')}}"><span class="glyphicon glyphicon-book"></span> Pages</a></li>
             <li {% if page.name=='settings' %} class="active" {% endif %}><a href="{{url_for('settings_page')}}"><span class="glyphicon glyphicon-wrench"></span> Settings</a></li>
             <li><a href="/"><span class="glyphicon glyphicon-home"></span> Site</a></li>
             <!--<li class="dropdown">

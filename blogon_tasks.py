@@ -1,4 +1,4 @@
-from flask import flash, jsonify, session, Response
+from flask import flash, jsonify, Response
 from flask import request, redirect
 from flask import url_for
 from time import sleep
@@ -68,11 +68,9 @@ def delete_post_task():
 @app.route("/blogon/task/logstream")
 @blogon_login_required
 def log_stream():
-
     def log():
         oldLog = 0
-        while True:
-            print('test')
+        for i in range(10):
             newLog = checkLogTime()
             if newLog > oldLog:
                 oldLog = newLog

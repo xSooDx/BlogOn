@@ -296,25 +296,29 @@ def publish_post(postid):
     c.execute("UPDATE posts SET published=1 WHERE postid=%s and userid=%s", (int(postid), int(session['userid'])))
     conn.commit()
     close(c, conn)
-    logEvent("post publish", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    logEvent("post publish",
+             "%s(%d) published %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     return postid
 
 
 def unpublish_post(postid):
     c, conn = connect()
+    logEvent("post unpublish",
+             "%s(%d) unpublished %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     c.execute("UPDATE posts SET published=0 WHERE postid=%s and userid=%s", (int(postid), int(session['userid'])))
     conn.commit()
     close(c, conn)
-    logEvent("post unpublish", "userid=" + str(session['userid']) + " postid=" + str(postid))
+
     return postid
 
 
 def delete_post(postid):
     c, conn = connect()
+    logEvent("post delete",
+             "%s(%d) deleted %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     c.execute("DELETE FROM posts WHERE userid=%s AND postid=%s", (int(session['userid']), int(postid)))
     conn.commit()
     close(c, conn)
-    logEvent("post delete", "userid=" + str(session['userid']) + " postid=" + str(postid))
     return postid
 
 
