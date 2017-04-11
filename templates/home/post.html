@@ -4,6 +4,7 @@
 <script>
 	function init(){
 		$('#content').append($.parseHTML("{{post['content']|safe}}"))
+		$('#title').append($.parseHTML("{{title}}"))
 		var t;
 		$(window).scroll(function() {
 			if($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
@@ -93,6 +94,10 @@
 </script>
 <body onload="init()"> 
 <div class="container">
+	<br><br>
+	<div id='title' style="margin: auto; text-align:center;font: 22px arial bold;">
+		
+	</div>
 	<br><br>
 	<div id="content">
 		

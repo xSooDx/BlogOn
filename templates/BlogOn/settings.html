@@ -5,9 +5,11 @@
 {% block body %}
 <script>
 	function update(){
-		data = {'name':$('#blog_name').val()}
+		name_data = $('#blog_name').val()
+		about_data = $('#about').val()
+		data = {'name':name_data, 'about':about_data}
 		$.ajax({
-			url: "/update_settings",
+			url: "/update_name",
 			data:  JSON.stringify(data),
 			type: "POST",
 			contentType: 'application/json;charset=UTF-8',
@@ -16,9 +18,10 @@
 				console.log(error);
 			}
 		});
+	
 	}
 	function update_success(){
-		$('#blog_name').val("")
+		//$('#blog_name').val("")
 		done = document.createElement('div')
 		done.className = "alert alert-success"
 		done.innerHTML = "Successfully Updated"
@@ -29,8 +32,26 @@
 		all.appendChild(br)
 		all.appendChild(done)
 	}
+	
+	function getolddata(){
+		$.ajax({
+			url: "/get_settings",
+			type: "POST",
+			dataType: "json",
+			success: function(data){
+			//	name = data['name']
+			//	about = data['about']
+				$('#blog_name').val(data['name'])
+				$('#about').val(data['about'])
+			},
+			error: function(error) {
+				console.log(error);
+			}
+		});
+	}
 </script>
-<div class="jumbotron" id='main'>
+<body onload="getolddata()">
+<div class="jumbotron" id='main' >
 	<form class="form-horizontal">
 		<div class="form-group">
 			<label class="control-label col-sm-2" >Blog Name:</label>
@@ -38,7 +59,12 @@
 			<input type="text" class="form-control" id="blog_name" required>
 			</div>
 		</div>
-		
+		<div class="form-group">
+			<label class="control-label col-sm-2" >About:</label>
+			<div class="col-sm-8">
+			<textarea type="text" class="form-control" id="about" required></textarea>
+			</div>
+		</div>
 		<div class="form-group"> 
 			<div class="col-sm-offset-2 col-sm-10">
 			<button type="button" onclick="update()" id='sub' class="btn btn-default">Submit</button>
@@ -46,4 +72,5 @@
 		</div>
 	</form>
 </div>
+</body>
 {% endblock %}
