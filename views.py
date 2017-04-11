@@ -2,7 +2,7 @@ from main import app
 from flask import render_template, request, redirect, url_for, session, flash
 from actions import login, logout, register_user, content_functions, get_post_by_title, get_comments_by_post, \
     post_comment;
-from settings import get_settings
+from settings import get_name, fetch_settings
 from functools import wraps
 import json
 
@@ -12,19 +12,22 @@ import json
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'nickname': get_settings()['value']}
+    user = {'nickname': get_name()['value']}
     return render_template('home/index.html', user=user)
 
 
 @app.route('/about')
 def about():
-    user = {'nickname': get_settings()['value']}
-    return render_template('home/about.html', user=user)
+    contents =fetch_settings()
+    print(contents)
+    user = {'nickname': contents['name']}
+    about = {'content': contents['about']}
+    return render_template('home/about.html', user=user, about=about)
 
 
 @app.route('/contact')
 def contact():
-    user = {'nickname': get_settings()['value']}
+    user = {'nickname': get_name()['value']}
     return render_template('home/contact.html', user=user)
 
 
@@ -33,7 +36,7 @@ count = 0
 
 @app.route('/<title>')
 def post(title):
-    user = {'nickname': get_settings()['value']}
+    user = {'nickname': get_name()['value']}
     global count
     count += 1
     print(count)
@@ -46,7 +49,7 @@ def post(title):
         # change to 404 not found
         post = ""
         return redirect(url_for('error'))
-    return render_template('home/post.html', user=user, post=post)
+    return render_template('home/post.html', user=user, post=post, title=title)
 
 
 @app.route('/load_comments', methods=['POST'])
@@ -73,5 +76,5 @@ def make_comment():
 
 @app.route('/error')
 def error():
-    user = {'nickname': get_settings()['value']}
+    user = {'nickname': get_name()['value']}
     return render_template('home/error.html', user=user)
