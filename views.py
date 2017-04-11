@@ -49,7 +49,7 @@ def post(title):
         # change to 404 not found
         post = ""
         return redirect(url_for('error'))
-    return render_template('home/post.html', user=user, post=post)
+    return render_template('home/post.html', user=user, post=post, title=title)
 
 
 @app.route('/load_comments', methods=['POST'])
