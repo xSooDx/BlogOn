@@ -10,6 +10,9 @@ if __name__ == '__main__':
         PORT = int(environ.get('SERVER_PORT', '5555'))
     except ValueError:
         PORT = 5555
+    UPLOAD_FOLDER = 'static\\uploads\\'
+
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(HOST, PORT, debug=True, threaded=True)
     server = WSGIServer(("", 5000), app)
     server.serve_forever()
