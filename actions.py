@@ -244,7 +244,10 @@ def create_post(**d):
 
     conn.commit()
     close(c, conn)
-    logEvent("post create", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    logEvent("post create",
+             "%s(%d),%s(%d)" % (
+             session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
+
     return postid
 
 
@@ -287,7 +290,10 @@ def update_post(postid, **d):
 
     conn.commit()
     close(c, conn)
-    logEvent("post update", "userid=" + str(session['userid']) + " postid=" + str(postid))
+    logEvent("post update",
+             "%s(%d),%s(%d)" % (
+             session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
+
     return postid
 
 
@@ -297,14 +303,14 @@ def publish_post(postid):
     conn.commit()
     close(c, conn)
     logEvent("post publish",
-             "%s(%d) published %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
+             "%s(%d),%s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     return postid
 
 
 def unpublish_post(postid):
     c, conn = connect()
     logEvent("post unpublish",
-             "%s(%d) unpublished %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
+             "%s(%d),%s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     c.execute("UPDATE posts SET published=0 WHERE postid=%s and userid=%s", (int(postid), int(session['userid'])))
     conn.commit()
     close(c, conn)
@@ -315,7 +321,7 @@ def unpublish_post(postid):
 def delete_post(postid):
     c, conn = connect()
     logEvent("post delete",
-             "%s(%d) deleted %s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
+             "%s(%d),%s(%d)" % (session['username'], int(session['userid']), get_post_by_id(postid)['title'], int(postid)))
     c.execute("DELETE FROM posts WHERE userid=%s AND postid=%s", (int(session['userid']), int(postid)))
     conn.commit()
     close(c, conn)
@@ -324,7 +330,7 @@ def delete_post(postid):
 
 def login(username, password, remember=False):
     c, conn = connect()
-    res = c.execute("SELECT * FROM users WHERE (username=%s OR email=%s) AND NOT rank=-1",
+    res = c.execute("SELECT * FROM users WHERE (username=%s OR email=%s)",
                     (thwart(username), thwart(username)))
     ret = 0
 
@@ -338,6 +344,10 @@ def login(username, password, remember=False):
             conn.commit()
             ret = 1
     close(c, conn)
+    logEvent("user login",
+             "%s(%d)" % (
+             session['username'], int(session['userid'])))
+
     return ret
 
 
@@ -355,7 +365,10 @@ def register_user(username, email, password):
     userid = c.fetchone()['userid']
     set_login_session(userid, username, email)
     close(c, conn)
-    logEvent("user register", "userid=" + userid)
+    logEvent("user register",
+             "%s(%d)" % (
+             session['username'], int(session['userid'])))
+
     return userid
 
 

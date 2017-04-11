@@ -12,7 +12,48 @@
         list = ""
             logs = JSON.parse(e.data.replace(/[']/g,"\""))
             for(var i=0; i<logs.logs.length; i++){
-                list+="<li class='list-group-item'>"+logs.logs[i]+"</li>"
+                var s = logs.logs[i].split('|')
+                var s1 = s[1].split(' ')
+                var str = "<span class='small text-muted'>"+s[0]+": </span> "
+                var glyph ="glyphicon glyphicon-"
+                if (s1[0]=='post'){
+                    var s2=s[2].split(',')
+                    str+=s2[0]+" "
+                    switch(s1[1]){
+                        case 'create':
+                               glyph+='floppy-save'
+                            break;
+                        case 'update':
+                                glyph+='edit'
+                            break;
+                        case 'publish':
+                            glyph+='check'
+                            break;
+                        case 'unpublish':
+                            glyph+='unchecked'
+                            break;
+                        case 'delete':
+                            glyph+='trash'
+                            break;
+                    }
+                    str+="<span class='"+glyph+"'></span> "+s2[1]
+                }
+                else if(s1[0]=='user'){
+                    str+=s[2]
+                    switch (s1[1]){
+                        case 'login':
+                        glyph+='log-in'
+                            break;
+                        case 'register':
+                        glyph+='user'
+                            break;
+                    }
+                   str+="<span class='"+glyph+"'></span>"
+                }
+                else{
+                    str=log.log[i];
+                }
+                list+="<li class='list-group-item'>" + str + "</li>"
             }
             logList.html(list)
         })

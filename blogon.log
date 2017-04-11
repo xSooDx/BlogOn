@@ -1,3 +1,6 @@
-2017-04-10 17:58:22|post update|userid=6 postid=32
-2017-04-10 19:57:30|post create|userid=6 postid=33
-2017-04-11 20:48:53|post delete|soodjr(6) deleted New Post 3(33)
+2017-04-11 22:55:16|post create|soodjr(6),Sup Sup Sup(33)
+2017-04-11 22:55:17|post publish|soodjr(6),Sup Sup Sup(33)
+2017-04-11 22:55:41|post delete|soodjr(6),Sup Sup Sup(33)
+2017-04-11 23:07:15|user login|soodjr(6)
+2017-04-11 23:09:26|post create|soodjr(6),Blog Engine mostly Done(34)
+2017-04-11 23:09:33|post publish|soodjr(6),Blog Engine mostly Done(34)
