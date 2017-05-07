@@ -2,7 +2,7 @@
 
 ## Requirements
 * python flask
-* flask MSQLdb
+* flask MySQLdb
 * passlib
 
 
